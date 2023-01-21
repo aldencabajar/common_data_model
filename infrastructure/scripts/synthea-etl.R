@@ -1,7 +1,5 @@
- devtools::install_github("OHDSI/ETL-Synthea")
-
+#!/usr/bin/Rscript
  library(ETLSyntheaBuilder)
- library()
 
  # We are loading a version 5.4 CDM into a local PostgreSQL database called "synthea10".
  # The ETLSyntheaBuilder package leverages the OHDSI/CommonDataModel package for CDM creation.
@@ -18,18 +16,21 @@
  
 cd <- DatabaseConnector::createConnectionDetails(
   dbms     = "postgresql", 
-  server   = "localhost/synthea10", 
-  user     = "user1", 
-  password = "lollipop", 
+  server   = "postgres/cdm", 
+  user     = Sys.getenv("POSTGRES_USER"),
+  password = Sys.getenv("POSTGRES_PASSWORD"),
   port     = 5432, 
-  pathToDriver = "d:/drivers"  
+  pathToDriver = "/app/driver"  
 )
 
-cdmSchema      <- "cdm_synthea10"
+cdmSchema      <- "CdmSchema"
 cdmVersion     <- "5.4"
-syntheaVersion <- "2.7.0"
+syntheaVersion <- "3.0.0"
 syntheaSchema  <- "native"
 syntheaFileLoc <- "/tmp/synthea/output/csv"
 vocabFileLoc   <- "/tmp/Vocabulary_20181119"
 
 ETLSyntheaBuilder::CreateCDMTables(connectionDetails = cd, cdmSchema = cdmSchema, cdmVersion = cdmVersion)
+ETLSyntheaBuilder::CreateSyntheaTables(connectionDetails = cd, syntheaSchema = syntheaSchema, syntheaVersion = syntheaVersion)
+ETLSyntheaBuilder::LoadSyntheaTables(connectionDetails = cd, syntheaSchema = syntheaSchema, syntheaFileLoc = syntheaFileLoc)
+ETLSyntheaBuilder::LoadEventTables(connectionDetails = cd, cdmSchema = cdmSchema, syntheaSchema = syntheaSchema, cdmVersion = cdmVersion, syntheaVersion = syntheaVersion)

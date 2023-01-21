@@ -1,7 +1,13 @@
-FROM r-base:3.6.3
+FROM rocker/tidyverse:4.0
 
 WORKDIR /app
+RUN apt-get update -y
+RUN apt-get install default-jdk -y
 
-COPY ./infrastructure/scripts  ./scripts
-RUN Rscript ./scripts/setup-dependencies.R
-# RUN Rscript ./scripts/synthea-etl.R
+
+RUN Rscript -e 'remotes::install_github("OHDSI/ETL-Synthea")'
+COPY ./infrastructure/scripts/setup-dependencies.R .
+RUN Rscript setup-dependencies.R
+COPY ./infrastructure/scripts/synthea-etl.R .
+
+CMD Rscript synthea-etl.R

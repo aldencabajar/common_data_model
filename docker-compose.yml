@@ -24,17 +24,32 @@ services:
       - PSQL_USER1_PW=${PSQL_USER1_PW}
     volumes: 
       - psql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - etlapp
   etl:
     build:
       context: .
       dockerfile: ./infrastructure/etl.Dockerfile
     depends_on:
-      postgres:
-        condition: service_started
       synthea:
         condition: service_completed_successfully
+      postgres:
+        condition: service_started
+    links:
+      - postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     image: synthea-etl:0.0.1
+    volumes:
+      - ./output:/tmp/synthea/output
+    networks:
+      - etlapp
 
 volumes:
   psql:
+networks:
+  etlapp:
 
