@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      
+      - name: Install Poetry and test 
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+          pytest -s
+          
+
+
