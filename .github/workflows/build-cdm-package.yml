@@ -17,7 +17,7 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           poetry install
-          pytest -s
+          poetry run pytest -s
           
 
 
