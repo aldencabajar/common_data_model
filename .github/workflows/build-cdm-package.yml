@@ -18,6 +18,41 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           poetry install
           poetry run pytest -s
+      
+      - name: build python package
+        run: |
+          poetry build -f wheel
+          echo ARTIFACT_NAME=$(ls dist/) >> $GITHUB_ENV
+      
+      - name: Delete previous latest tag
+        uses: dev-drprasad/delete-tag-and-release@v0.1.2
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Release
+        id: create_release 
+        # note id is referenced below in Deploy uberJar
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest
+          draft: false
+          prerelease: true
+
+      - name: Deploy python package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          # This pulls from the CREATE RELEASE step above, referencing its ID to get its outputs object, which include a `upload_url` 
+          asset_path: dist/${{ env.ARTIFACT_NAME }}
+          asset_name: ${{ env.ARTIFACT_NAME }}
+          asset_content_type: application/zip
+      
           
 
 
