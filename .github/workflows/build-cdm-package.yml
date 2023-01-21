@@ -33,6 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Create Release
+        if: success() || failure()
         id: create_release 
         # note id is referenced below in Deploy uberJar
         uses: ncipollo/release-action@v1
